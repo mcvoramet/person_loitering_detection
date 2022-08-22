@@ -15,5 +15,3 @@ for img_file in natsorted(os.listdir(img_dir)):
 
 out.release()
 
-
-

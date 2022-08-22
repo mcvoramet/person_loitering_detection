@@ -12,6 +12,21 @@ from tbad.combined_model.fusion import load_pretrained_combined_model
 
 # Compute Reconstruction Error
 def get_reconstruction_errors(pretrained_model_path, trajectories):
+    """
+    Computed reconstruction errors
+
+    Parameters
+    ----------
+    pretrained_model_path                 : str
+                                            path to pretrained model
+    trajectories                          : dict
+                                            dict of video_id as a key and Trajectory() object as a value
+
+    Returns
+    ----------
+    recontruction_error                   : numpy.ndarray
+                                           array of recontruction error value for each frame
+    """
     # Model Intialization
     model_info = os.path.basename(os.path.split(pretrained_model_path)[0])
     message_passing = 'mp' in model_info
@@ -50,7 +65,6 @@ def get_reconstruction_errors(pretrained_model_path, trajectories):
     elif '_Orobust_' in model_info:
         out_normalisation_strategy = 'robust'
 
-    # TODO
     # Data
     trajectories = remove_short_trajectories(trajectories, input_length=input_length,
                                              input_gap=input_gap, pred_length=pred_length)
@@ -119,6 +133,27 @@ def get_reconstruction_errors(pretrained_model_path, trajectories):
 
 # Detect Anomalous
 def detect_most_anomalous_or_most_normal_frames(reconstruction_errors, anomalous=True, fraction=0.20):
+    """
+    Tell which frame is normal or anomalous
+
+    Parameters
+    ----------
+    reconstruction_errors                   : numpy.ndarray
+                                              array of recontruction error for each frame
+    anomalous                               : bool
+                                              True, for returning True for anomalous frame indices and vice versa
+
+    fraction                                : float
+                                              fraction of frame to blame on
+
+
+    Returns
+    ----------
+    anomalous_or_normal_frame               : numpy.ndarray
+                                              array contain True or False value to tell which is normal or anomalous
+
+    """
+
     reconstruction_errors_sorted = np.sort(reconstruction_errors)
     num_frames_to_blame = round(len(reconstruction_errors_sorted) * fraction)
     if anomalous:
@@ -133,6 +168,22 @@ def detect_most_anomalous_or_most_normal_frames(reconstruction_errors, anomalous
 
 # Inference Pipeline
 def extract_anomalous_frame(pretrained_model_path, trajectories):
+    """
+    Tell which frame is normal or anomalous
+
+    Parameters
+    ----------
+    pretrained_model_path                           : str
+                                                      path to pretrained model
+    trajectories                                    : dict
+                                                      dict of video_id as a key and Trajectory() object as a value
+
+    Returns
+    ----------
+    np.where(anomalous_frames == True)               : numpy.ndarray
+                                                       array contain which frame number is anomalous
+
+    """
     # Perfrom reconstruction error
     reconstruction_errors = get_reconstruction_errors(pretrained_model_path, trajectories)
 

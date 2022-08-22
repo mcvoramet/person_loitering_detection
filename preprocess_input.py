@@ -8,23 +8,22 @@ from tbad.autoencoder.data import Trajectory
 from natsort import natsorted
 
 
-def get_trajectories_format(video_id_dict):
-    trajectories_frames, trajectories_coordinates = {}, {}
-    frame_num_list = []
-    trajectories_dict = {}
-    for video_id in video_id_dict.keys():
-
-        for frame_num in video_id_dict[video_id]:
-            trajectory_id = video_id + "_" + str(frame_num)
-            frame_num_list.append(frame_num)
-            trajectories_coordinates[trajectory_id] = flatten(video_id_dict[video_id][frame_num])
-
-        trajectories_frames[video_id] = frame_num_list
-
-    return trajectories_frames, trajectories_coordinates
-
-
 def get_trajectories_object(video_id_dict):
+    """
+    Convert the dict format of trajectory data to be in Trajectory() object format
+
+    Parameters
+    ----------
+    video_id_dict                 : dict
+                                    dict of frame number as a key and skeleton coordinates as a value
+
+    Returns
+    ----------
+    trajectories                  : Trajectory() object
+                                    data in Trajectory() object format
+
+
+    """
     trajectories = {}
     frame_num_list = []
     video_frame_list = []
@@ -43,6 +42,8 @@ def get_trajectories_object(video_id_dict):
 
 
 def flatten(l):
+    """Flatten the list from [[x1, y1], [x2. y2], ...] to [x1, y1, x2, y2, ...]"""
+
     return [item for sublist in l for item in sublist]
 
 
@@ -55,16 +56,17 @@ def convert_normalized_frame(frame_size, keypoints, confidence_threshold, ignore
     frame_size                 : numpy.ndarray
                                  input frame image                  :
     keypoints                  : list
-                                 list of keypoints [norm(y) corrdinate, norm(x) coordinate, confidence_scores]
+                                 list of keypoints [normalized(y), normalized(x), confidence_scores]
     confidence_threshold       : float
                                  value of confidence threshold (0.0-1.0)
-    ignore_confidence          : TODO
+    ignore_confidence          : bool
+                               : True for not using the confidence threshold for returning skeleton points
 
     Returns
     ----------
-    fitting_size_dict           : dict
-                                  dict of new coordinate after conversion with it frame number
-                                  {0 : [[x1, y1], [x2, y2], ....], 1 : [[x1, y1], [x2, y2], ....], ....}
+    fitting_size_list           : list
+                                  list of new coordinate after conversion with it frame number
+                                  [[x1, y1], [x2, y2], ....]
     """
 
     y, x, c = frame_size.shape
@@ -91,6 +93,20 @@ def convert_normalized_frame(frame_size, keypoints, confidence_threshold, ignore
 
 
 def prep_input(dataset_dir):
+    """
+    Convert the normalized size of frame to match the original shape of an image
+
+    Parameters
+    ----------
+    dataset_dir                 : str
+                                : dataset path contained frame from the video that will be using for skeleton detection
+
+    Returns
+    ----------
+    trajectories                : dict
+                                  dict of video_id as a key and Trajectory() object as a value
+    """
+
     model = hub.load('https://tfhub.dev/google/movenet/multipose/lightning/1')
     movenet = model.signatures['serving_default']
 
