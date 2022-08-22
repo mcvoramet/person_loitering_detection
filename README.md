@@ -33,3 +33,5 @@ To train a model from scratch you should look up the model's configuration optio
  --rec_length 12 --pred_length 6 --reconstruct_reverse --cell gru --global_hidden 8 --local_hidden 16 --output_activation linear 
  --optimiser adam --learning_rate 0.001 --loss mse --epochs 5 --batch_size 256 --global_normalisation robust --local_normalisation robust 
  --out_normalisation robust
+ 
+# Run inference
